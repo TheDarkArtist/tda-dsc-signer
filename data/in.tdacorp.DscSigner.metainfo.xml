@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>in.tdacorp.DscSigner</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>DSC Signer</name>
+  <summary>Sign PDFs with a DSC USB token (PKCS#11)</summary>
+  <developer id="in.tdacorp">
+    <name>TDACorp</name>
+  </developer>
+  <url type="homepage">https://github.com/TheDarkArtist/tda-dsc-signer</url>
+  <url type="bugtracker">https://github.com/TheDarkArtist/tda-dsc-signer/issues</url>
+  <url type="vcs-browser">https://github.com/TheDarkArtist/tda-dsc-signer</url>
+  <description>
+    <p>
+      DSC Signer places a PAdES digital signature on a PDF using a Digital Signature Certificate
+      held on a PKCS#11 USB token. Pick a box on a page, choose the signer, enter the token PIN and save the signed copy.
+      A command line interface is included.
+    </p>
+    <p>
+      No token driver is bundled: install your token vendor's PKCS#11 library separately.
+      The application does not claim that any particular authority or portal will accept its output.
+    </p>
+  </description>
+  <launchable type="desktop-id">in.tdacorp.DscSigner.desktop</launchable>
+  <provides>
+    <binary>tda-dsc-signer</binary>
+    <binary>dsc-sign</binary>
+  </provides>
+  <categories>
+    <category>Office</category>
+  </categories>
+  <keywords>
+    <keyword>DSC</keyword>
+    <keyword>digital signature</keyword>
+    <keyword>PDF</keyword>
+    <keyword>PKCS#11</keyword>
+    <keyword>token</keyword>
+    <keyword>MCA</keyword>
+  </keywords>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </supports>
+  <content_rating type="oars-1.1"/>
+  <screenshots>
+    <screenshot type="default">
+      <caption>MCA mode: signature fields found in the PDF, matched by PAN</caption>
+      <image type="source">https://raw.githubusercontent.com/TheDarkArtist/tda-dsc-signer/main/docs/screenshots/mca-mode.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>General mode: draw a box anywhere on a page</caption>
+      <image type="source">https://raw.githubusercontent.com/TheDarkArtist/tda-dsc-signer/main/docs/screenshots/general-mode.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Settings</caption>
+      <image type="source">https://raw.githubusercontent.com/TheDarkArtist/tda-dsc-signer/main/docs/screenshots/settings.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Narrow window layout</caption>
+      <image type="source">https://raw.githubusercontent.com/TheDarkArtist/tda-dsc-signer/main/docs/screenshots/narrow.png</image>
+    </screenshot>
+  </screenshots>
+  <releases>
+    <release version="0.1.0" date="2026-10-04">
+      <description>
+        <p>First public release: GTK4 window and command line, general and MCA form-field signing.</p>
+      </description>
+    </release>
+  </releases>
+</component>

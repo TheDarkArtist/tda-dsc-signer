@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=DSC Signer
+Comment=Sign PDFs with a DSC USB token
+Exec=tda-dsc-signer %f
+Icon=in.tdacorp.DscSigner
+Terminal=false
+Categories=Office;
+MimeType=application/pdf;
+StartupWMClass=in.tdacorp.DscSigner
