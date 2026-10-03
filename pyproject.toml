@@ -1,0 +1,64 @@
+[build-system]
+requires = ["uv_build>=0.10,<0.13"]
+build-backend = "uv_build"
+
+[project]
+name = "tda-dsc-signer"
+version = "0.1.0"
+description = "Sign PDFs with a DSC USB token (PKCS#11) from a native GTK4 window"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+keywords = ["dsc", "digital-signature-certificate", "pkcs11", "pdf", "pades", "india", "mca", "usb-token", "esign", "gtk4", "linux", "pyhanko"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: X11 Applications :: GTK",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Security :: Cryptography",
+    "Topic :: Office/Business",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "pyhanko[opentype,image-support]>=0.30,<0.38",  # 0.x: minors break; 0.37.0 verified. No [pkcs11] extra: it pins python-pkcs11~=0.9.3, we require it directly
+    "python-pkcs11>=0.9,<0.11",  # 0.9.5 and 0.10.0 (Arch) verified
+    "asn1crypto>=1.5,<2",  # 1.5.1 verified
+]
+
+[project.urls]
+Homepage = "https://thedarkartist.github.io/tda-dsc-signer/"
+Documentation = "https://thedarkartist.github.io/tda-dsc-signer/"
+Source = "https://github.com/TheDarkArtist/tda-dsc-signer"
+Repository = "https://github.com/TheDarkArtist/tda-dsc-signer"
+Issues = "https://github.com/TheDarkArtist/tda-dsc-signer/issues"
+Changelog = "https://github.com/TheDarkArtist/tda-dsc-signer/blob/main/CHANGELOG.md"
+Discussions = "https://github.com/TheDarkArtist/tda-dsc-signer/discussions"
+
+[project.scripts]
+tda-dsc-signer = "tda_dsc_signer.cli:main"
+dsc-sign = "tda_dsc_signer.cli:main"
+
+[dependency-groups]
+dev = ["pytest", "ruff", "ty", "reportlab"]
+
+[tool.uv]
+# gi (PyGObject/GTK4/Poppler) comes from the system; the dev venv is created with --system-site-packages.
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 150
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+"src/tda_dsc_signer/gui/*" = ["E402"]  # gi.require_version must precede the gi.repository import
