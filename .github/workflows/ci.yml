@@ -1,0 +1,115 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv sync --frozen --only-group dev
+      - run: uv run --no-sync ruff check
+      - run: uv run --no-sync ruff format --check
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    container: archlinux:latest
+    env:
+      GSK_RENDERER: cairo
+      UV_PYTHON_DOWNLOADS: never
+    steps:
+      - name: System packages
+        run: >
+          pacman -Syu --noconfirm noto-fonts python python-gobject gtk4 poppler-glib poppler xorg-server-xvfb
+          softhsm p11-kit nss pcsclite ccid uv git base-devel dbus
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Unprivileged user (SoftHSM and GTK refuse or misbehave as root)
+        run: |
+          useradd -m tester
+          chown -R tester "$GITHUB_WORKSPACE"
+      - name: Test suite
+        run: |
+          su tester -c '
+            set -e
+            export GSK_RENDERER=cairo UV_PYTHON_DOWNLOADS=never HOME="$(mktemp -d)"
+            cd "$GITHUB_WORKSPACE"
+            uv venv --system-site-packages --python /usr/bin/python3
+            uv sync --frozen
+            xvfb-run -a uv run pytest -q --ignore=tests/smoke_gui.py
+          '
+
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container: archlinux:latest
+    steps:
+      - name: System packages
+        run: pacman -Syu --noconfirm python python-pip uv desktop-file-utils appstream git
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build sdist and wheel
+        run: uv build
+      - name: Smoke-test the wheel in a clean venv
+        run: |
+          python -m venv /tmp/smoke
+          /tmp/smoke/bin/pip install --quiet dist/*.whl
+          /tmp/smoke/bin/tda-dsc-signer --version
+      - name: Validate desktop entry and AppStream metadata
+        run: |
+          desktop-file-validate data/in.tdacorp.DscSigner.desktop
+          appstreamcli validate --pedantic --no-net data/in.tdacorp.DscSigner.metainfo.xml
+
+  packaging:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container: archlinux:latest
+    steps:
+      - name: System packages
+        run: pacman -Syu --noconfirm base-devel git python python-build python-installer python-uv-build sudo
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build the package from the working tree
+        run: |
+          ver=$(python -c 'import tomllib; print(tomllib.load(open("pyproject.toml","rb"))["project"]["version"])')
+          useradd -m builder
+          src=/home/builder/src; mkdir -p "$src/pkg"
+          tar --exclude=.git --exclude=.venv --exclude=dist --exclude='__pycache__' \
+              --transform "s,^\./,tda-dsc-signer-$ver/," -czf "$src/pkg/tda-dsc-signer-$ver.tar.gz" .
+          cp packaging/PKGBUILD packaging/*.install "$src/pkg/"
+          # use the local tarball instead of the (not yet existing) GitHub tag archive
+          sed -i 's|^source=.*|source=("$pkgname-$pkgver.tar.gz")|' "$src/pkg/PKGBUILD"
+          chown -R builder "$src"
+          su builder -c "cd $src/pkg && makepkg --nodeps --nocheck --skipinteg --noconfirm"
+      - name: Assert package contents
+        run: |
+          pkg=$(ls /home/builder/src/pkg/*.pkg.tar.zst)
+          tar -tf "$pkg" > files.txt
+          for p in usr/bin/tda-dsc-signer \
+                   usr/share/applications/in.tdacorp.DscSigner.desktop \
+                   usr/share/metainfo/in.tdacorp.DscSigner.metainfo.xml \
+                   usr/share/icons/hicolor/scalable/apps/in.tdacorp.DscSigner.svg \
+                   usr/share/licenses/tda-dsc-signer/LICENSE; do
+            grep -qx "$p" files.txt || { echo "missing from package: $p" >&2; exit 1; }
+          done
+          if grep -E '(^|/)(tests|\.git|\.venv)(/|$)' files.txt; then echo "unexpected files in package" >&2; exit 1; fi
+          echo "package OK: $(wc -l < files.txt) entries"
