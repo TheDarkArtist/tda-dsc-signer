@@ -1,0 +1,11 @@
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = ccid
+Target = tda-dsc-signer-ccid-innait
+
+[Action]
+Description = Re-adding InnaitKey DSC (338c:0031) to the CCID device list
+When = PostTransaction
+Exec = /usr/bin/tda-dsc-signer-ccid-innait-patch

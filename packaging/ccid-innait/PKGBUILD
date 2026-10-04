@@ -1,0 +1,23 @@
+# Maintainer: Kushagra Sharma <tda@thedarkartist.in>
+# OPTIONAL. NOT part of the main tda-dsc-signer package and not required by it.
+# WARNING: this package MODIFIES A FILE OWNED BY `ccid`
+# (/usr/lib/pcsc/drivers/ifd-ccid.bundle/Contents/Info.plist) from a pacman hook. `pacman -Qkk ccid` will report
+# that file as altered, and a ccid upgrade rewrites it before the hook re-patches it. See ../README-packaging.md
+# for why this is the least-bad packaged option and for the package-free alternative (NoUpgrade).
+pkgname=tda-dsc-signer-ccid-innait
+pkgver=1
+pkgrel=1
+pkgdesc='Pacman hook that adds the InnaIT DSC token (USB 338c:0031) to the ccid device list'
+arch=(any)
+url=https://github.com/TheDarkArtist/tda-dsc-signer
+license=(GPL-3.0-or-later)
+depends=(ccid python)
+source=(tda-dsc-signer-ccid-innait-patch tda-dsc-signer-ccid-innait.hook)
+sha256sums=('SKIP' 'SKIP')   # TODO(user): updpkgsums
+
+package() {
+  install -Dm755 tda-dsc-signer-ccid-innait-patch -t "$pkgdir/usr/bin/"
+  install -Dm644 tda-dsc-signer-ccid-innait.hook -t "$pkgdir/usr/share/libalpm/hooks/"
+}
+# Note: the patch script is idempotent but has no uninstall step; removing this package leaves Info.plist patched
+# until ccid is next upgraded or reinstalled (`pacman -S ccid`).

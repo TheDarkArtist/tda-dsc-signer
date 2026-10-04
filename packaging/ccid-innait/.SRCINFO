@@ -1,0 +1,15 @@
+pkgbase = tda-dsc-signer-ccid-innait
+	pkgdesc = Pacman hook that adds the InnaIT DSC token (USB 338c:0031) to the ccid device list
+	pkgver = 1
+	pkgrel = 1
+	url = https://github.com/TheDarkArtist/tda-dsc-signer
+	arch = any
+	license = GPL-3.0-or-later
+	depends = ccid
+	depends = python
+	source = tda-dsc-signer-ccid-innait-patch
+	source = tda-dsc-signer-ccid-innait.hook
+	sha256sums = SKIP
+	sha256sums = SKIP
+
+pkgname = tda-dsc-signer-ccid-innait
