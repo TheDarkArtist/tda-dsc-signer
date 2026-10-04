@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DSC USB token not detected on Linux: troubleshooting | DSC Signer</title>
+<meta name="description" content="Fix a DSC USB token that is not detected on Linux: pcscd, CCID, the vendor driver, driver clashes between programs, launcher PATH and Seahorse notes.">
+<link rel="canonical" href="https://thedarkartist.github.io/tda-dsc-signer/guides/troubleshooting.html">
+<meta name="theme-color" content="#0f0f13">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="DSC Signer">
+<meta property="og:title" content="DSC USB token not detected on Linux: troubleshooting | DSC Signer">
+<meta property="og:description" content="Fix a DSC USB token that is not detected on Linux: pcscd, CCID, the vendor driver, driver clashes between programs, launcher PATH and Seahorse notes.">
+<meta property="og:url" content="https://thedarkartist.github.io/tda-dsc-signer/guides/troubleshooting.html">
+<meta property="og:image" content="https://thedarkartist.github.io/tda-dsc-signer/assets/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DSC USB token not detected on Linux: troubleshooting | DSC Signer">
+<meta name="twitter:description" content="Fix a DSC USB token that is not detected on Linux: pcscd, CCID, the vendor driver, driver clashes between programs, launcher PATH and Seahorse notes.">
+<meta name="twitter:image" content="https://thedarkartist.github.io/tda-dsc-signer/assets/social-preview.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "DSC Signer", "item": "https://thedarkartist.github.io/tda-dsc-signer/"}, {"@type": "ListItem", "position": 2, "name": "DSC USB token not detected on Linux: troubleshooting", "item": "https://thedarkartist.github.io/tda-dsc-signer/guides/troubleshooting.html"}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap"><a class="brand" href="../index.html"><img src="../assets/favicon.svg" alt="" width="32" height="32">DSC Signer</a>
+<nav aria-label="Main"><a href="../index.html#install">Install</a><a href="sign-mca-forms-linux.html">MCA forms</a>
+<a href="troubleshooting.html">Troubleshooting</a><a href="https://github.com/TheDarkArtist/tda-dsc-signer">GitHub</a></nav></div></header>
+<main id="main" class="wrap">
+<p class="crumbs"><a href="../index.html">DSC Signer</a> / DSC USB token not detected on Linux: troubleshooting</p>
+<article>
+<h1>DSC USB token not detected on Linux: troubleshooting</h1>
+<p>Start with <code>tda-dsc-signer doctor</code>. It checks pcscd, USB, the CCID plist, the pacman hook and the driver, and prints the sudo fixes it suggests. It never runs sudo.</p>
+<h2>"No tokens found" although the token is plugged in</h2>
+<p>PC/SC readers and vendor drivers <strong>cannot be shared between processes</strong>. If another program (another signer, a browser extension host, an OpenSC tool) holds the driver, a second process silently sees no tokens.</p>
+<ul><li>DSC Signer takes an exclusive per-driver lock. The message "token driver ... is in use by another tda-dsc-signer" names the holder's PID. Close that instance, or use <code>--wait-driver SECONDS</code>. <code>list</code> and <code>sign</code> exit with status 3 while the driver is busy.</li><li>OpenSC is only a fallback and can disturb the vendor driver. Set <code>opensc_fallback = "never"</code> in <code>~/.config/tda-dsc-signer/config.toml</code> (or <code>--opensc-fallback never</code>) to switch it off.</li><li>"N token device(s) detected but the driver returned M": the scan is repeated up to 3 times, then the mismatch is reported.</li></ul>
+<h2>The driver is not found</h2>
+<p>DSC Signer only loads modules that are absolute regular files owned by root or you, and not group- or world-writable. A module you own must be allowed explicitly with <code>--allow-user-module PATH</code> or <code>allowed_modules = [...]</code> in the config. Refusals are printed on stderr by <code>list</code>.</p>
+<h2>First run is slow</h2>
+<p>The InnaIT driver sleeps about 7 seconds on its first call per process. The GUI starts it at launch.</p>
+<h2>The launcher says "failed to open"</h2>
+<p>A graphical session's <code>PATH</code> often lacks <code>~/.local/bin</code>. <code>make install</code> writes the desktop entry with an absolute path; re-run it after moving the prefix. <code>tda-dsc-signer doctor</code> prints the exact one-line fix.</p>
+<h2>Wrong PIN</h2>
+<p>Each signing run makes exactly one login and never retries: a wrong PIN counts against the token's retry limit. After a wrong PIN, the next attempt within 5 minutes needs confirmation ("Try anyway", or <code>--confirm-after-failure</code>). If the token reports its last try, <code>--confirm-final-try</code> is required. InnaIT tokens set no retry flags, so the absence of a warning does not mean retries are left.</p>
+<h2>Seahorse and saved PINs</h2>
+<p>Saved PINs (optional, off by default) use the system Secret Service. KeePassXC with Secret Service Integration, or gnome-keyring, provides it; Seahorse is only a viewer for gnome-keyring. If no Secret Service is running, <code>keyring</code> mode is refused and there is no plaintext fallback. A PIN is never written to the config file.</p>
+<h2>Still stuck</h2>
+<p>Run with <code>DSC_DEBUG=1 tda-dsc-signer ...</code> for one diagnostic line per step (a PIN is never printed) and open an issue: https://github.com/TheDarkArtist/tda-dsc-signer/issues</p>
+</article>
+</main>
+<footer><div class="wrap"><p>GPL-3.0-or-later. Not affiliated with the Ministry of Corporate Affairs, the CCA or any certifying authority.
+The TDACorp logo is a brand mark and is not covered by the GPL.</p></div></footer>
+</body>
+</html>

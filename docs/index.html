@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DSC Signer: sign PDFs and MCA forms with your DSC token on Linux</title>
+<meta name="description" content="Free, open-source GTK4 app to sign PDFs and MCA forms with your DSC USB token on Linux. Matches PAN fields to your certificate; PINs are never stored.">
+<link rel="canonical" href="https://thedarkartist.github.io/tda-dsc-signer/">
+<meta name="theme-color" content="#0f0f13">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link rel="stylesheet" href="assets/style.css">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="DSC Signer">
+<meta property="og:title" content="DSC Signer: sign PDFs and MCA forms with your DSC token on Linux">
+<meta property="og:description" content="Free, open-source GTK4 app to sign PDFs and MCA forms with your DSC USB token on Linux. Matches PAN fields to your certificate; PINs are never stored.">
+<meta property="og:url" content="https://thedarkartist.github.io/tda-dsc-signer/">
+<meta property="og:image" content="https://thedarkartist.github.io/tda-dsc-signer/assets/social-preview.png">
+<meta property="og:image:width" content="1280">
+<meta property="og:image:height" content="640">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="DSC Signer: sign PDFs and MCA forms with your DSC token on Linux">
+<meta name="twitter:description" content="Free, open-source GTK4 app to sign PDFs and MCA forms with your DSC USB token on Linux. Matches PAN fields to your certificate; PINs are never stored.">
+<meta name="twitter:image" content="https://thedarkartist.github.io/tda-dsc-signer/assets/social-preview.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "SoftwareApplication", "name": "DSC Signer", "applicationCategory": "SecurityApplication", "operatingSystem": "Linux", "description": "Free, open-source GTK4 app to sign PDFs and MCA forms with your DSC USB token on Linux. Matches PAN fields to your certificate; PINs are never stored.", "url": "https://thedarkartist.github.io/tda-dsc-signer/", "softwareVersion": "0.1.0", "license": "https://www.gnu.org/licenses/gpl-3.0.html", "downloadUrl": "https://github.com/TheDarkArtist/tda-dsc-signer", "codeRepository": "https://github.com/TheDarkArtist/tda-dsc-signer", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}, "screenshot": ["https://thedarkartist.github.io/tda-dsc-signer/screenshots/mca-mode.png", "https://thedarkartist.github.io/tda-dsc-signer/screenshots/general-mode.png", "https://thedarkartist.github.io/tda-dsc-signer/screenshots/settings.png"], "author": {"@type": "Person", "name": "Kushagra Sharma", "alternateName": "TheDarkArtist"}}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "FAQPage", "mainEntity": [{"@type": "Question", "name": "How do I sign a PDF with a DSC on Linux?", "acceptedAnswer": {"@type": "Answer", "text": "Install DSC Signer and your token vendor's PKCS#11 driver, plug in the token, open the PDF with tda-dsc-signer file.pdf, draw a signature box, press Sign Document and enter the token PIN. The signed copy is saved next to the original; the input is never overwritten. The same can be done from the command line with tda-dsc-signer sign."}}, {"@type": "Question", "name": "Does it work with Class 3 DSC tokens?", "acceptedAnswer": {"@type": "Answer", "text": "DSC Signer signs with whichever signing certificate your token's PKCS#11 driver exposes. The certificate class is decided by the authority that issued it, not by this tool. Only InnaIT tokens have been tested."}}, {"@type": "Question", "name": "Which tokens work?", "acceptedAnswer": {"@type": "Answer", "text": "InnaIT tokens are verified. Other PKCS#11 tokens (for example ePass2003, WatchData, eToken) are untested: they may work if their Linux driver is installed, but there is no confirmation. Reports are welcome on the issue tracker."}}, {"@type": "Question", "name": "Is MCA acceptance guaranteed?", "acceptedAnswer": {"@type": "Answer", "text": "No. Acceptance by the MCA portal is not verified: the portal's rules are not public to this tool. The signature format used for form fields is configurable with --format so it can be changed if the portal expects something else."}}, {"@type": "Question", "name": "Where are my PINs stored?", "acceptedAnswer": {"@type": "Answer", "text": "By default nowhere: the PIN is typed each time and kept in memory for one call. Optionally you can keep it for the session (memory only) or in the system Secret Service keyring (KeePassXC or gnome-keyring). A PIN is never written to a config file, log, command line or environment variable, and there is no plaintext fallback."}}, {"@type": "Question", "name": "Is it affiliated with MCA?", "acceptedAnswer": {"@type": "Answer", "text": "No. DSC Signer is an independent project and is not affiliated with the Ministry of Corporate Affairs, the CCA or any certifying authority."}}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap"><a class="brand" href="./"><img src="assets/favicon.svg" alt="" width="32" height="32">DSC Signer</a>
+<nav aria-label="Main"><a href="#features">Features</a><a href="#mca">MCA forms</a><a href="#install">Install</a><a href="#faq">FAQ</a><a href="https://github.com/TheDarkArtist/tda-dsc-signer">GitHub</a></nav></div></header>
+<main id="main" class="wrap">
+<section class="hero">
+<h1>Sign PDFs and MCA forms with your DSC USB token on Linux</h1>
+<p class="lead">DSC Signer is a native GTK4 app and command line tool that signs PDFs with a Digital Signature Certificate held on a PKCS#11 USB token. It fills the empty signature fields of MCA forms and picks the token whose certificate matches each PAN.</p>
+<pre><code>yay -S tda-dsc-signer</code></pre>
+<div class="btns"><a class="btn p" href="#install">Install</a><a class="btn" href="guides/sign-mca-forms-linux.html">Sign MCA forms</a><a class="btn" href="https://github.com/TheDarkArtist/tda-dsc-signer">Source on GitHub</a></div>
+<img class="demo" src="screenshots/demo.gif" alt="Demo: opening a form, ticking a field that matches the token, pressing Sign Document, entering the PIN and getting the result" width="960" height="812">
+</section>
+
+<h2 id="what">What it does</h2>
+<p>Pick a PDF, pick the token, press <strong>Sign Document</strong>, enter the PIN. The signature is a PAdES (or adbe.pkcs7.detached) signature made by the token itself: the private key never leaves the device. The input file is never overwritten, and the result is checked after signing.</p>
+<div class="shots">
+<figure><img src="screenshots/mca-mode.png" alt="MCA mode listing the signature fields of a form with PAN matches" loading="lazy" width="1100" height="720"><figcaption>MCA mode: fields and the token that matches each PAN</figcaption></figure>
+<figure><img src="screenshots/general-mode.png" alt="General mode with a signature box drawn on a PDF page" loading="lazy" width="1100" height="720"><figcaption>General mode: draw a box anywhere</figcaption></figure>
+<figure><img src="screenshots/settings.png" alt="Settings window with saved PIN modes" loading="lazy" width="1100" height="620"><figcaption>Settings and PIN modes</figcaption></figure>
+</div>
+
+<h2 id="features">Features</h2>
+<div class="grid">
+<div class="card"><h3>MCA and general modes</h3><p>Fill existing signature fields of a form, or draw a visible box (or none) on any PDF.</p></div>
+<div class="card"><h3>PAN matching</h3><p>Each field is matched to the attached token automatically, and a mismatch is refused before any PIN is asked.</p></div>
+<div class="card"><h3>PIN safety</h3><p>One login per signing action, never retried, with a guard after a wrong PIN and on the final try.</p></div>
+<div class="card"><h3>GUI and CLI</h3><p><code>tda-dsc-signer</code> and the short alias <code>dsc-sign</code>, with <code>list</code>, <code>fields</code>, <code>sign</code>, <code>pin</code>, <code>trust</code> and <code>doctor</code>.</p></div>
+<div class="card"><h3>Isolated driver</h3><p>The vendor library runs in a separate subprocess and is only loaded from trusted paths.</p></div>
+<div class="card"><h3>Open source</h3><p>GPL-3.0-or-later. No telemetry, no accounts, no bundled driver.</p></div>
+</div>
+
+<h2 id="mca">How MCA form signing works</h2>
+<p>MCA forms ship empty signature fields named <code>sigfield&lt;N&gt;_&lt;PAN&gt;</code>. An Indian DSC carries the SHA-256 of the holder's PAN as its certificate <code>serialNumber</code>, so DSC Signer hashes the PAN in each field name and matches it against the certificates on your tokens, automatically.</p>
+<pre><code>tda-dsc-signer fields FORM.pdf            # fields, pages, masked PANs, matching token (no PIN)
+tda-dsc-signer sign FORM.pdf --all-fields # sign every field a connected token matches</code></pre>
+<p class="note">Acceptance by the MCA portal is <strong>not verified</strong>: its rules are not public to this tool. Read the <a href="guides/sign-mca-forms-linux.html">full guide</a>.</p>
+
+<h2 id="tokens">Supported tokens</h2>
+<p>InnaIT tokens are verified. Other PKCS#11 tokens are untested. No vendor driver is bundled: install yours separately. Details in <a href="guides/supported-tokens.html">supported tokens</a>; if the token is not found, see <a href="guides/troubleshooting.html">troubleshooting</a>.</p>
+
+<h2 id="install">Install</h2>
+<h3>Arch Linux (AUR)</h3>
+<pre><code>yay -S tda-dsc-signer</code></pre>
+<h3>From source</h3>
+<pre><code>git clone https://github.com/TheDarkArtist/tda-dsc-signer
+cd tda-dsc-signer
+uv venv --system-site-packages --python /usr/bin/python3
+make install
+tda-dsc-signer doctor</code></pre>
+<p>Needs <code>gtk4</code>, <code>poppler-glib</code>, <code>python-gobject</code>, <code>pcsclite</code> and <code>ccid</code>. See the <a href="guides/install-arch-aur.html">install guide</a>.</p>
+
+<h2 id="security">Security</h2>
+<ul>
+<li>PINs are typed each time by default and kept in memory for one call. Optional modes: session (memory only) or the system keyring (Secret Service). Never a file, log, command line or environment.</li>
+<li>No Secret Service running means keyring mode is refused: there is no plaintext fallback.</li>
+<li>The private key stays on the token; the vendor library is isolated in its own process.</li>
+</ul>
+<p>Report vulnerabilities through GitHub private vulnerability reporting; see <a href="https://github.com/TheDarkArtist/tda-dsc-signer/blob/main/SECURITY.md">SECURITY.md</a>.</p>
+
+<h2 id="faq">FAQ</h2>
+<details><summary>How do I sign a PDF with a DSC on Linux?</summary><p>Install DSC Signer and your token vendor's PKCS#11 driver, plug in the token, open the PDF with tda-dsc-signer file.pdf, draw a signature box, press Sign Document and enter the token PIN. The signed copy is saved next to the original; the input is never overwritten. The same can be done from the command line with tda-dsc-signer sign.</p></details>
+<details><summary>Does it work with Class 3 DSC tokens?</summary><p>DSC Signer signs with whichever signing certificate your token's PKCS#11 driver exposes. The certificate class is decided by the authority that issued it, not by this tool. Only InnaIT tokens have been tested.</p></details>
+<details><summary>Which tokens work?</summary><p>InnaIT tokens are verified. Other PKCS#11 tokens (for example ePass2003, WatchData, eToken) are untested: they may work if their Linux driver is installed, but there is no confirmation. Reports are welcome on the issue tracker.</p></details>
+<details><summary>Is MCA acceptance guaranteed?</summary><p>No. Acceptance by the MCA portal is not verified: the portal's rules are not public to this tool. The signature format used for form fields is configurable with --format so it can be changed if the portal expects something else.</p></details>
+<details><summary>Where are my PINs stored?</summary><p>By default nowhere: the PIN is typed each time and kept in memory for one call. Optionally you can keep it for the session (memory only) or in the system Secret Service keyring (KeePassXC or gnome-keyring). A PIN is never written to a config file, log, command line or environment variable, and there is no plaintext fallback.</p></details>
+<details><summary>Is it affiliated with MCA?</summary><p>No. DSC Signer is an independent project and is not affiliated with the Ministry of Corporate Affairs, the CCA or any certifying authority.</p></details>
+</main>
+<footer><div class="wrap">
+<p>DSC Signer is free software under the GPL-3.0-or-later. <a href="https://github.com/TheDarkArtist/tda-dsc-signer/blob/main/LICENSE">Licence</a> · <a href="https://github.com/TheDarkArtist/tda-dsc-signer">Source</a> · <a href="https://github.com/TheDarkArtist/tda-dsc-signer/issues">Issues</a> · <a href="https://github.com/TheDarkArtist/tda-dsc-signer/blob/main/CHANGELOG.md">Changelog</a></p>
+<p>Not affiliated with the Ministry of Corporate Affairs, the CCA or any certifying authority. The TDACorp logo is a brand mark and is not covered by the GPL.</p>
+</div></footer>
+</body>
+</html>

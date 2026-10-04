@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>How to sign MCA forms with a DSC on Linux | DSC Signer</title>
+<meta name="description" content="Step by step: sign the empty signature fields of an MCA form with a DSC USB token on Linux. PAN matching, GUI and command line, and what is unverified.">
+<link rel="canonical" href="https://thedarkartist.github.io/tda-dsc-signer/guides/sign-mca-forms-linux.html">
+<meta name="theme-color" content="#0f0f13">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="DSC Signer">
+<meta property="og:title" content="How to sign MCA forms with a DSC on Linux | DSC Signer">
+<meta property="og:description" content="Step by step: sign the empty signature fields of an MCA form with a DSC USB token on Linux. PAN matching, GUI and command line, and what is unverified.">
+<meta property="og:url" content="https://thedarkartist.github.io/tda-dsc-signer/guides/sign-mca-forms-linux.html">
+<meta property="og:image" content="https://thedarkartist.github.io/tda-dsc-signer/assets/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How to sign MCA forms with a DSC on Linux | DSC Signer">
+<meta name="twitter:description" content="Step by step: sign the empty signature fields of an MCA form with a DSC USB token on Linux. PAN matching, GUI and command line, and what is unverified.">
+<meta name="twitter:image" content="https://thedarkartist.github.io/tda-dsc-signer/assets/social-preview.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "DSC Signer", "item": "https://thedarkartist.github.io/tda-dsc-signer/"}, {"@type": "ListItem", "position": 2, "name": "How to sign MCA forms with a DSC on Linux", "item": "https://thedarkartist.github.io/tda-dsc-signer/guides/sign-mca-forms-linux.html"}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap"><a class="brand" href="../index.html"><img src="../assets/favicon.svg" alt="" width="32" height="32">DSC Signer</a>
+<nav aria-label="Main"><a href="../index.html#install">Install</a><a href="sign-mca-forms-linux.html">MCA forms</a>
+<a href="troubleshooting.html">Troubleshooting</a><a href="https://github.com/TheDarkArtist/tda-dsc-signer">GitHub</a></nav></div></header>
+<main id="main" class="wrap">
+<p class="crumbs"><a href="../index.html">DSC Signer</a> / How to sign MCA forms with a DSC on Linux</p>
+<article>
+<h1>How to sign MCA forms with a DSC on Linux</h1>
+<p>MCA forms ship <strong>empty signature fields</strong> named <code>sigfield&lt;N&gt;_&lt;PAN&gt;</code>, for example <code>sigfield2_PQRST5678K</code>. DSC Signer fills those fields in place with your token's certificate. This guide shows the GUI and the command line.</p>
+<h2>Before you start</h2>
+<ul><li>Install DSC Signer (<a href="install-arch-aur.html">Arch/AUR guide</a> or from source) and your token vendor's PKCS#11 driver. No driver is bundled.</li><li>Plug in the token and check it is seen: <code>tda-dsc-signer list</code>.</li><li>If nothing is listed, see <a href="troubleshooting.html">troubleshooting</a>.</li></ul>
+<h2>How a field is matched to your token</h2>
+<p>An Indian DSC carries the SHA-256 of the holder's PAN (lowercase hex) as the subject <code>serialNumber</code>. DSC Signer hashes the PAN from each field name and compares it with the certificate on each attached token. A match is shown as "PAN matches". If a field's PAN does not match the certificate, signing is refused before any PIN is requested (override: <code>--allow-pan-mismatch</code>).</p>
+<h2>In the window</h2>
+<ol><li>Run <code>tda-dsc-signer FORM.pdf</code>. A PDF with empty signature fields opens in MCA mode.</li><li>The panel lists each field with its page and masked PAN, and which attached token matches it.</li><li>Tick the fields to sign, then press <strong>Sign Document</strong> (Ctrl+S).</li><li>Enter the token PIN in the popover. Each token is asked once per signing run.</li><li>Choose where to save. The input is never overwritten; fields you did not tick stay empty for the next signer.</li></ol>
+<h2>On the command line</h2>
+<pre><code>tda-dsc-signer fields FORM.pdf                 # fields, pages, masked PANs, matching token (no PIN)
+tda-dsc-signer sign FORM.pdf --field sigfield2_PQRST5678K -t 1
+tda-dsc-signer sign FORM.pdf --all-fields      # every empty field with a matching attached token</code></pre>
+<p>When several people must sign, each signer repeats the run on the previous output. Outputs are never merged or overwritten.</p>
+<h2>What is not verified</h2>
+<ul><li><strong>Acceptance by the MCA portal is not verified.</strong> The portal's rules are not public to this tool. The signature subfilter the portal expects is unknown: the default is <code>adbe.pkcs7.detached</code> for fields, switchable with <code>--format pades</code>.</li><li>Only InnaIT tokens have been tested. See <a href="supported-tokens.html">supported tokens</a>.</li><li>The 2 MB size warning of the <code>mca</code> profile reflects reported limits, not a check against the portal.</li></ul>
+<p>DSC Signer is not affiliated with the Ministry of Corporate Affairs, the CCA or any certifying authority.</p>
+</article>
+</main>
+<footer><div class="wrap"><p>GPL-3.0-or-later. Not affiliated with the Ministry of Corporate Affairs, the CCA or any certifying authority.
+The TDACorp logo is a brand mark and is not covered by the GPL.</p></div></footer>
+</body>
+</html>

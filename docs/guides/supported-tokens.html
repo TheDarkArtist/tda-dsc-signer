@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Supported DSC USB tokens on Linux | DSC Signer</title>
+<meta name="description" content="Which DSC USB tokens work with DSC Signer on Linux: InnaIT is verified, others are untested. How tokens are found and how to report your token.">
+<link rel="canonical" href="https://thedarkartist.github.io/tda-dsc-signer/guides/supported-tokens.html">
+<meta name="theme-color" content="#0f0f13">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="DSC Signer">
+<meta property="og:title" content="Supported DSC USB tokens on Linux | DSC Signer">
+<meta property="og:description" content="Which DSC USB tokens work with DSC Signer on Linux: InnaIT is verified, others are untested. How tokens are found and how to report your token.">
+<meta property="og:url" content="https://thedarkartist.github.io/tda-dsc-signer/guides/supported-tokens.html">
+<meta property="og:image" content="https://thedarkartist.github.io/tda-dsc-signer/assets/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Supported DSC USB tokens on Linux | DSC Signer">
+<meta name="twitter:description" content="Which DSC USB tokens work with DSC Signer on Linux: InnaIT is verified, others are untested. How tokens are found and how to report your token.">
+<meta name="twitter:image" content="https://thedarkartist.github.io/tda-dsc-signer/assets/social-preview.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "DSC Signer", "item": "https://thedarkartist.github.io/tda-dsc-signer/"}, {"@type": "ListItem", "position": 2, "name": "Supported DSC USB tokens on Linux", "item": "https://thedarkartist.github.io/tda-dsc-signer/guides/supported-tokens.html"}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap"><a class="brand" href="../index.html"><img src="../assets/favicon.svg" alt="" width="32" height="32">DSC Signer</a>
+<nav aria-label="Main"><a href="../index.html#install">Install</a><a href="sign-mca-forms-linux.html">MCA forms</a>
+<a href="troubleshooting.html">Troubleshooting</a><a href="https://github.com/TheDarkArtist/tda-dsc-signer">GitHub</a></nav></div></header>
+<main id="main" class="wrap">
+<p class="crumbs"><a href="../index.html">DSC Signer</a> / Supported DSC USB tokens on Linux</p>
+<article>
+<h1>Supported DSC USB tokens on Linux</h1>
+<p>DSC Signer talks PKCS#11, so in principle any token with a Linux PKCS#11 library can work. In practice only some are verified.</p>
+<table><thead><tr><th>Token / driver</th><th>Status</th></tr></thead><tbody><tr><td>InnaIT (Precision Biometric)</td><td>Verified</td></tr><tr><td>Other vendors (for example ePass2003, WatchData, eToken)</td><td>Untested</td></tr></tbody></table>
+<p>"Untested" does not mean "unsupported", and it does not mean "works". If you try one, please report the result on the <a href="https://github.com/TheDarkArtist/tda-dsc-signer/issues">issue tracker</a>.</p>
+<h2>How tokens are found</h2>
+<ul><li>Modules come from p11-kit registrations, a table of known vendor library paths, the <code>DSC_MODULES</code> environment variable and <code>extra_modules</code> in the config. OpenSC is a last-resort fallback.</li><li><code>p11-kit-proxy.so</code> is never used.</li><li>The driver runs in its own subprocess, never inside the GUI or CLI process.</li><li>Run <code>tda-dsc-signer list</code> to see what is found, and <code>tda-dsc-signer doctor</code> to diagnose.</li></ul>
+<h2>Class 3 certificates</h2>
+<p>DSC Signer reads whatever signing certificates the driver exposes. Whether a certificate is Class 2 or Class 3 is a property of the certificate your authority issued, not something this tool decides.</p>
+<h2>No bundled driver</h2>
+<p>Install your vendor's driver yourself. See <a href="install-arch-aur.html">install</a> and <a href="troubleshooting.html">troubleshooting</a>.</p>
+</article>
+</main>
+<footer><div class="wrap"><p>GPL-3.0-or-later. Not affiliated with the Ministry of Corporate Affairs, the CCA or any certifying authority.
+The TDACorp logo is a brand mark and is not covered by the GPL.</p></div></footer>
+</body>
+</html>

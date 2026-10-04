@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Install DSC Signer on Arch Linux (AUR) | DSC Signer</title>
+<meta name="description" content="Install the DSC Signer GTK4 PDF signer on Arch Linux from the AUR or from source, plus the token driver and pcscd setup it needs.">
+<link rel="canonical" href="https://thedarkartist.github.io/tda-dsc-signer/guides/install-arch-aur.html">
+<meta name="theme-color" content="#0f0f13">
+<link rel="icon" type="image/svg+xml" href="../assets/favicon.svg">
+<link rel="stylesheet" href="../assets/style.css">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="DSC Signer">
+<meta property="og:title" content="Install DSC Signer on Arch Linux (AUR) | DSC Signer">
+<meta property="og:description" content="Install the DSC Signer GTK4 PDF signer on Arch Linux from the AUR or from source, plus the token driver and pcscd setup it needs.">
+<meta property="og:url" content="https://thedarkartist.github.io/tda-dsc-signer/guides/install-arch-aur.html">
+<meta property="og:image" content="https://thedarkartist.github.io/tda-dsc-signer/assets/social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Install DSC Signer on Arch Linux (AUR) | DSC Signer">
+<meta name="twitter:description" content="Install the DSC Signer GTK4 PDF signer on Arch Linux from the AUR or from source, plus the token driver and pcscd setup it needs.">
+<meta name="twitter:image" content="https://thedarkartist.github.io/tda-dsc-signer/assets/social-preview.png">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "DSC Signer", "item": "https://thedarkartist.github.io/tda-dsc-signer/"}, {"@type": "ListItem", "position": 2, "name": "Install DSC Signer on Arch Linux (AUR)", "item": "https://thedarkartist.github.io/tda-dsc-signer/guides/install-arch-aur.html"}]}</script>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="top"><div class="wrap"><a class="brand" href="../index.html"><img src="../assets/favicon.svg" alt="" width="32" height="32">DSC Signer</a>
+<nav aria-label="Main"><a href="../index.html#install">Install</a><a href="sign-mca-forms-linux.html">MCA forms</a>
+<a href="troubleshooting.html">Troubleshooting</a><a href="https://github.com/TheDarkArtist/tda-dsc-signer">GitHub</a></nav></div></header>
+<main id="main" class="wrap">
+<p class="crumbs"><a href="../index.html">DSC Signer</a> / Install DSC Signer on Arch Linux (AUR)</p>
+<article>
+<h1>Install DSC Signer on Arch Linux</h1>
+<h2>From the AUR</h2>
+<p>The AUR package is named <code>tda-dsc-signer</code>:</p>
+<pre><code>yay -S tda-dsc-signer        # or paru -S tda-dsc-signer, or build the PKGBUILD by hand</code></pre>
+<p>Check the package page and read the PKGBUILD before installing; AUR packages are user-submitted.</p>
+<h2>From source</h2>
+<p>System dependencies: <code>gtk4</code>, <code>poppler-glib</code>, <code>python-gobject</code>, <code>pcsclite</code> and <code>ccid</code>.</p>
+<pre><code>git clone https://github.com/TheDarkArtist/tda-dsc-signer
+cd tda-dsc-signer
+uv venv --system-site-packages --python /usr/bin/python3
+make install        # venv in ~/.local/share/tda-dsc-signer, command in ~/.local/bin</code></pre>
+<p>The virtual environment must see the system <code>gi</code>, which is why a plain <code>uv tool install</code> does not work. Update by running <code>make install</code> again; remove with <code>make uninstall</code>.</p>
+<h2>The token driver</h2>
+<p>DSC Signer does <strong>not</strong> bundle a vendor PKCS#11 driver. Install the one for your token. For InnaIT tokens the library is <code>/opt/Precision_Biometric/InnaITDSC/libraries/libInnaITPKCS11Driver.so</code>. Enable the smart card daemon:</p>
+<pre><code>sudo systemctl enable --now pcscd.socket
+tda-dsc-signer doctor     # checks pcscd, USB, the CCID plist and the driver; prints the exact sudo fixes
+tda-dsc-signer list       # shows the signing certificates on attached tokens</code></pre>
+<p><code>doctor</code> never runs sudo itself. If <code>list</code> finds nothing, read <a href="troubleshooting.html">troubleshooting</a>.</p>
+<h2>Manual page</h2>
+<p><code>man tda-dsc-signer</code> documents every command and option.</p>
+</article>
+</main>
+<footer><div class="wrap"><p>GPL-3.0-or-later. Not affiliated with the Ministry of Corporate Affairs, the CCA or any certifying authority.
+The TDACorp logo is a brand mark and is not covered by the GPL.</p></div></footer>
+</body>
+</html>
