@@ -1,0 +1,170 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to release (e.g. v0.2.0)
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TAG }}
+          persist-credentials: false
+      - run: python3 scripts/check-release.py --tag "$TAG"
+
+  build:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TAG }}
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      - run: uv build
+      - run: cd dist && sha256sum * > ../SHA256SUMS && mv ../SHA256SUMS . && cat SHA256SUMS
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: dist/*
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: dist
+          path: dist/
+          if-no-files-found: error
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      id-token: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TAG }}
+          persist-credentials: false
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dist
+          path: dist
+      - name: Create the GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python3 scripts/release-notes.py --tag "$TAG" > notes.md
+          flags=()
+          case "$TAG" in *-*) flags+=(--prerelease);; esac
+          gh release create "$TAG" dist/* --repo "$GITHUB_REPOSITORY" --verify-tag --title "$TAG" --notes-file notes.md "${flags[@]}"
+
+  aur-prepare:
+    needs: release
+    # Only stable tags, and only once the maintainer opted in (see RELEASING.md).
+    if: vars.AUR_AUTO_PUBLISH == 'true' && !contains(inputs.tag || github.ref_name, '-')
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container: archlinux:latest
+    permissions:
+      contents: read
+    steps:
+      - name: System packages
+        run: pacman -Syu --noconfirm base-devel git python curl
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ env.TAG }}
+          persist-credentials: false
+      - name: Update PKGBUILD from the real tag archive and regenerate .SRCINFO
+        run: |
+          ver="${TAG#v}"
+          curl -fsSL "https://github.com/$GITHUB_REPOSITORY/archive/refs/tags/$TAG.tar.gz" -o archive.tar.gz
+          sha=$(sha256sum archive.tar.gz | cut -d' ' -f1)
+          python scripts/update-pkgbuild.py --version "$ver" --sha256 "$sha"
+          useradd -m builder
+          mkdir /home/builder/pkg
+          cp packaging/PKGBUILD packaging/*.install /home/builder/pkg/
+          chown -R builder /home/builder/pkg
+          su builder -c 'cd /home/builder/pkg && makepkg --printsrcinfo > .SRCINFO'
+          cp /home/builder/pkg/.SRCINFO packaging/.SRCINFO
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: aur
+          path: |
+            packaging/PKGBUILD
+            packaging/.SRCINFO
+            packaging/*.install
+          include-hidden-files: true
+          if-no-files-found: error
+
+  aur:
+    needs: aur-prepare
+    # Runs on the plain runner: the deploy action is a Docker action and cannot run inside a container job.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: aur
+          path: aur
+      - name: Committer identity from the PKGBUILD maintainer line
+        id: who
+        run: |
+          line=$(sed -n 's/^# Maintainer: *//p' aur/PKGBUILD | head -1)
+          echo "name=${line% <*}" >> "$GITHUB_OUTPUT"
+          mail=${line#*<}
+          echo "email=${mail%>*}" >> "$GITHUB_OUTPUT"
+      - name: Publish to the AUR
+        uses: KSXGitHub/github-actions-deploy-aur@084b0d9b15415bf9cdb65d44dad1efe37a354050 # v4.2.0
+        with:
+          pkgname: tda-dsc-signer
+          pkgbuild: aur/PKGBUILD
+          assets: |
+            aur/.SRCINFO
+            aur/*.install
+          commit_username: ${{ steps.who.outputs.name }}
+          commit_email: ${{ steps.who.outputs.email }}
+          commit_message: release ${{ env.TAG }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          test: ${{ vars.AUR_DRY_RUN == 'true' }}
+
+  pypi:
+    # Disabled. To enable: create the project on PyPI, add a Trusted Publisher (owner TheDarkArtist, repo tda-dsc-signer,
+    # workflow release.yml, environment pypi), create the "pypi" environment in the repo settings, replace `false` below
+    # with `!contains(github.ref_name, '-')`, and keep id-token: write. No API token is ever stored.
+    if: false
+    needs: release
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          name: dist
+          path: dist
+      - run: echo "Add pypa/gh-action-pypi-publish pinned to a commit SHA here when enabling (see comment above)."
