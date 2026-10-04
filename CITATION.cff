@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "DSC Signer"
+type: software
+authors:
+  - given-names: "Kushagra"
+    family-names: "Sharma"
+    alias: "TheDarkArtist"
+repository-code: "https://github.com/TheDarkArtist/tda-dsc-signer"
+url: "https://thedarkartist.github.io/tda-dsc-signer/"
+license: GPL-3.0-or-later
+version: 0.1.0
+date-released: "2026-10-04"
+abstract: "Sign PDFs and MCA forms with a Digital Signature Certificate (DSC) held on a PKCS#11 USB token, from a native GTK4 window or the command line, on Linux."
+keywords:
+  - dsc
+  - digital signature certificate
+  - pkcs11
+  - pdf
+  - pades
+  - india
+  - mca
+  - usb token
+  - gtk4
+  - linux

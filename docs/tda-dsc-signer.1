@@ -1,0 +1,193 @@
+.TH TDA-DSC-SIGNER 1 "2026-10-04" "tda-dsc-signer 0.1.0" "User Commands"
+.SH NAME
+tda-dsc-signer, dsc-sign \- sign PDFs and MCA forms with a DSC USB token (PKCS#11)
+.SH SYNOPSIS
+.B tda-dsc-signer
+[\fIfile.pdf\fR]
+.br
+.B tda-dsc-signer
+.I command
+[\fIoptions\fR]
+.br
+.B dsc-sign
+.I same as tda-dsc-signer
+.SH DESCRIPTION
+.B tda-dsc-signer
+places a PAdES (or adbe.pkcs7.detached) digital signature on a PDF using a Digital Signature
+Certificate held on a PKCS#11 USB token.
+With no command, or with a single \fI.pdf\fR path, it opens the GTK4 window (the "gui" mode).
+The subcommands below are scriptable and never need a display.
+.PP
+No vendor PKCS#11 driver is bundled: install your token vendor's library separately.
+Each driver is loaded in a separate module host subprocess, never in the calling process.
+The tool does not claim that any authority or portal will accept its output.
+.SH COMMANDS
+.TP
+.B list
+List signing certificates on attached tokens.
+No PIN is needed.
+.TP
+.BI fields " input"
+List the signature fields of a PDF and which attached token matches each PAN.
+No PIN is needed.
+.TP
+.BI sign " input"
+Sign a PDF.
+Options are listed below.
+.TP
+.B pin status
+Per token: PIN mode and whether a PIN is saved.
+Never prints a PIN.
+.TP
+.BI "pin set \-t " N " [\-\-mode session|keyring] [\-\-pin\-fd " N ]
+Save a PIN, read from a prompt or a file descriptor.
+No login happens.
+.TP
+.BR "pin forget " "[\-t \fIN\fR | \-\-all]"
+Delete a saved PIN.
+.TP
+.B trust install [\-\-db DB] [\-\-force\-db] [\-\-old\-roots]
+Create or update the dedicated NSS database with the pinned Indian CCA trust bundle.
+.TP
+.B trust status
+List pinned certificates and the contents of the NSS database.
+.TP
+.B trust fetch [\-\-dir DIR]
+Re-download the certificates from the official URLs and verify them against the pins.
+.TP
+.B doctor
+Check pcscd, USB, the CCID plist, the pacman hook and the driver, and print the sudo fixes.
+It never runs sudo.
+.TP
+.B gui
+There is no subcommand of this name: run
+.B tda-dsc-signer
+without arguments, or with a PDF path, to open the window.
+.SH OPTIONS
+These options are accepted by
+.BR list ,
+.BR fields ,
+.B sign
+and
+.BR pin .
+.TP
+.BI \-\-wait\-driver " SECONDS"
+Wait this long for another tda-dsc-signer to release the driver (default 0).
+.TP
+.BR \-\-opensc\-fallback " {auto,never,always}"
+OpenSC probe.
+.B auto
+(default) runs it only if no vendor module exists and no driver is busy.
+.TP
+.BI \-\-allow\-user\-module " PATH"
+Permit this user-owned PKCS#11 module for this run.
+.SS Options of sign
+.TP
+.BR \-o ", " \-\-output " \fIOUTPUT\fR"
+Output file.
+Default: \fI<name>\fR\-signed.pdf.
+The input is never overwritten.
+.TP
+.BR \-p ", " \-\-page " \fIPAGE\fR"
+1-based page; \-1 is the last page.
+.TP
+.BR \-b ", " \-\-box " \fIBOX\fR"
+Signature box in PDF points, origin bottom-left (X1,Y1,X2,Y2).
+.TP
+.BR \-t ", " \-\-token " \fITOKEN\fR"
+Token number from \fBlist\fR.
+.TP
+.BR \-\-profile " {mca,general}"
+.B mca
+(default) is size-checked for MCA uploads; the limit is reported, not verified against the portal.
+.TP
+.B \-\-confirm\-final\-try
+Allow the login when the token reports its last PIN try.
+.TP
+.B \-\-confirm\-after\-failure
+Allow a login within 5 minutes of a recorded wrong PIN on this token.
+.TP
+.B \-\-force
+Overwrite the output file if it already exists.
+.TP
+.BI \-\-pin\-fd " N"
+Read the PIN (one line) from inherited file descriptor N.
+The prompt is preferred.
+.TP
+.B \-\-saved\-pin
+Use the PIN saved for this token (see \fBpin set\fR); prompts when none is saved.
+.TP
+.B \-\-invisible
+Invisible signature: no box, page ignored.
+.TP
+.BI \-\-field " NAME"
+Sign into this existing empty signature field (see \fBfields\fR).
+Box, page and \fB\-\-invisible\fR do not apply.
+.TP
+.B \-\-all\-fields
+Sign every empty field whose PAN matches an attached token; the rest are listed.
+.TP
+.B \-\-allow\-pan\-mismatch
+Sign a PAN-named field with a certificate that does not match the PAN.
+.TP
+.BR \-\-format " {auto,pades,adbe}"
+.B auto
+uses adbe.pkcs7.detached for fields and PAdES for boxes.
+.SH FILES
+.TP
+.I ~/.config/tda-dsc-signer/config.toml
+Last token and box, signature format, timestamp URL, extra and allowed modules, PIN modes (never PINs).
+.TP
+.I ~/.local/share/tda-dsc-signer/nssdb
+Dedicated NSS database created by
+.BR "trust install" .
+.TP
+.I $XDG_RUNTIME_DIR/tda-dsc-signer/
+Driver lock files and the per-token wrong-PIN memory (timestamp and count only).
+.SH ENVIRONMENT
+.TP
+.B DSC_MODULES
+Additional PKCS#11 module paths.
+.TP
+.B DSC_DEBUG
+If set to 1, print one line per signing step to standard error.
+A PIN is never printed.
+.TP
+.B PYHANKO_PKCS11_PIN
+One-off PIN source.
+Removed from the environment immediately, but visible in /proc/PID/environ of the launcher; avoid it.
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 2
+.B sign
+finished but post-sign verification failed (modified, invalid signature or revoked).
+.TP
+.B 3
+Another tda-dsc-signer owns the token driver (\fBlist\fR, \fBsign\fR).
+.TP
+.B 1
+Other errors; the message is printed to standard error.
+.SH SECURITY
+The PIN is never stored, logged or placed on a command line.
+Exactly one login is made per signing action and it is never retried.
+A wrong PIN is remembered for 5 minutes per token (timestamp and count) and blocks the next attempt unless confirmed.
+Saved PINs are opt-in: modes
+.BR ask ,
+.B session
+and
+.B keyring
+(Secret Service); there is no plaintext fallback.
+.SH BUGS
+Report bugs at https://github.com/TheDarkArtist/tda-dsc-signer/issues.
+Unverified: acceptance of the output by the MCA portal, and every token other than InnaIT.
+.SH AUTHOR
+Kushagra Sharma (TheDarkArtist), TDACorp.
+.SH SEE ALSO
+.BR pdfsig (1),
+.BR pcscd (8),
+.BR p11-kit (8)
+.PP
+https://thedarkartist.github.io/tda-dsc-signer/
