@@ -1,3 +1,4 @@
+# Publishes docs/ (static landing page and guides, no build step) to GitHub Pages.
 name: Pages
 
 on:
