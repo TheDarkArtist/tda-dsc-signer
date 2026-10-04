@@ -97,7 +97,8 @@ jobs:
               --transform "s,^\./,tda-dsc-signer-$ver/," -czf "$src/pkg/tda-dsc-signer-$ver.tar.gz" .
           cp packaging/PKGBUILD packaging/*.install "$src/pkg/"
           # use the local tarball instead of the (not yet existing) GitHub tag archive
-          sed -i 's|^source=.*|source=("$pkgname-$pkgver.tar.gz")|' "$src/pkg/PKGBUILD"
+          sed -i '/^source=(/,/)$/c\source=("$pkgname-$pkgver.tar.gz")' "$src/pkg/PKGBUILD"
+          sed -i "s|^sha256sums=.*|sha256sums=('SKIP')|" "$src/pkg/PKGBUILD"
           chown -R builder "$src"
           su builder -c "cd $src/pkg && makepkg --nodeps --nocheck --skipinteg --noconfirm"
       - name: Assert package contents
