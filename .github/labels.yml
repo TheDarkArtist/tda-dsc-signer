@@ -1,0 +1,43 @@
+# Applied by scripts/gh-bootstrap.sh (gh label create --force). One key per line; keep this exact shape.
+- name: bug
+  color: d73a4a
+  description: Something is not working
+- name: enhancement
+  color: a2eeef
+  description: New feature or improvement
+- name: token-support
+  color: 0e8a16
+  description: A specific token brand, model or driver
+- name: mca-forms
+  color: 1d76db
+  description: MCA form-field signing and PAN matching
+- name: gui
+  color: 5319e7
+  description: The GTK4 window
+- name: packaging
+  color: fbca04
+  description: AUR, PKGBUILD, wheel, desktop and metainfo files
+- name: docs
+  color: 0075ca
+  description: Documentation and the project site
+- name: security
+  color: b60205
+  description: Security-relevant change or hardening
+- name: good first issue
+  color: 7057ff
+  description: Good for newcomers
+- name: help wanted
+  color: 008672
+  description: Extra attention is needed
+- name: dependencies
+  color: 0366d6
+  description: Dependency updates
+- name: skip-changelog
+  color: ededed
+  description: Leave out of the auto-generated release notes
+- name: needs-info
+  color: d876e3
+  description: Waiting for more details from the reporter
+- name: wontfix
+  color: ffffff
+  description: Will not be worked on

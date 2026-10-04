@@ -1,0 +1,38 @@
+name: Bug report
+description: Something does not work as documented
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never paste PINs, PANs, certificates, signed documents or screenshots showing personal data.** Redact them.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: GUI or command line, in order.
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Output of `tda-dsc-signer doctor`
+      description: Review it first and redact anything personal.
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Output of `tda-dsc-signer --version`, and how you installed it (AUR, make install, ...).
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Distribution, desktop and session type (X11 or Wayland)

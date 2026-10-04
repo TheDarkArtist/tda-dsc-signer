@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or idea
+    url: https://github.com/TheDarkArtist/tda-dsc-signer/discussions
+    about: Ask usage questions and discuss ideas in GitHub Discussions.
+  - name: Report a security vulnerability
+    url: https://github.com/TheDarkArtist/tda-dsc-signer/security/advisories/new
+    about: Report privately. Do not open a public issue for vulnerabilities.

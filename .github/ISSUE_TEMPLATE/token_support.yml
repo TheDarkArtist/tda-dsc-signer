@@ -1,0 +1,45 @@
+name: Token support report
+description: Report that a token brand/model works, or does not
+labels: [token-support]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Never paste PINs, PANs, certificates, signed documents or screenshots showing personal data.**
+        Redact serial numbers and holder names from the output below.
+  - type: input
+    id: token
+    attributes:
+      label: Token brand and model
+      description: For example ePass2003, WatchData ProxKey, SafeNet eToken 5110.
+    validations:
+      required: true
+  - type: input
+    id: driver
+    attributes:
+      label: Driver and PKCS#11 module
+      description: Package or vendor download, version, and the .so path.
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Result
+      options:
+        - Works (listed and signs)
+        - Listed but signing fails
+        - Not listed
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Output of `tda-dsc-signer doctor`
+      description: Review it first and redact anything personal.
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Distribution and tda-dsc-signer version
