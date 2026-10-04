@@ -43,6 +43,20 @@ run `make release VERSION=0.2.1`, push the branch and tag. Merge the changelog/v
 
 All third-party actions are pinned to full commit SHAs; Dependabot (weekly for actions, monthly for uv) proposes bumps.
 
+## Signing the release tarball (AUR)
+
+The PKGBUILD verifies `tda-dsc-signer-X.Y.Z.tar.gz.asc` against `validpgpkeys` (the AUR signing key). After the tag is pushed and the
+release workflow has finished, sign the GitHub tag archive and attach the signature to the release before pushing to the AUR:
+
+```sh
+curl -sL https://github.com/TheDarkArtist/tda-dsc-signer/archive/refs/tags/vX.Y.Z.tar.gz -o tda-dsc-signer-X.Y.Z.tar.gz
+gpg --detach-sign -a tda-dsc-signer-X.Y.Z.tar.gz
+gh release upload vX.Y.Z tda-dsc-signer-X.Y.Z.tar.gz.asc
+```
+
+CI cannot do this (the private key never leaves the maintainer's machine), so keep `AUR_AUTO_PUBLISH` off or the automated AUR push will
+fail source verification for releases without an attached `.asc`.
+
 ## AUR automation (optional, off by default)
 
 The `aur` jobs run only when the repository **variable** `AUR_AUTO_PUBLISH` is `true`, and only for stable tags.

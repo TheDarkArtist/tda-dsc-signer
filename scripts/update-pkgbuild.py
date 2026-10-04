@@ -17,7 +17,7 @@ def update(text: str, version: str, sha256: str) -> str:
     text = re.sub(r"^pkgver=[^\s#]+", f"pkgver={version}", text, count=1, flags=re.M)
     if old.group(1) != version:
         text = re.sub(r"^pkgrel=.*$", "pkgrel=1", text, count=1, flags=re.M)
-    text, n = re.subn(r"^sha256sums=\([^)]*\)", f"sha256sums=('{sha256}')", text, count=1, flags=re.M)
+    text, n = re.subn(r"^sha256sums=\(.*$", f"sha256sums=('{sha256}' 'SKIP')   # tag archive; the .asc is checked by gpg", text, count=1, flags=re.M)
     if n != 1:
         raise SystemExit("PKGBUILD: no single-line sha256sums=(...)")
     return text

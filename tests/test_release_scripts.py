@@ -109,5 +109,5 @@ def test_update_pkgbuild_sets_version_and_checksum(root):
     sha = "ab" * 32
     run("update-pkgbuild.py", "--version", "0.3.0", "--sha256", sha, "--root", root, check=True)
     pkg = (root / "packaging/PKGBUILD").read_text()
-    assert "pkgver=0.3.0" in pkg and f"sha256sums=('{sha}')" in pkg and "pkgrel=1" in pkg
+    assert "pkgver=0.3.0" in pkg and f"sha256sums=('{sha}' 'SKIP')" in pkg and "pkgrel=1" in pkg
     assert run("update-pkgbuild.py", "--version", "0.3.0", "--sha256", "zz", "--root", root).returncode != 0
