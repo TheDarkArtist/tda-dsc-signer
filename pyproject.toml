@@ -4,7 +4,7 @@ build-backend = "uv_build"
 
 [project]
 name = "tda-dsc-signer"
-version = "0.1.0"
+version = "0.1.1"
 description = "Sign PDFs with a DSC USB token (PKCS#11) from a native GTK4 window"
 readme = "README.md"
 license = "GPL-3.0-or-later"

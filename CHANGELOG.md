@@ -5,6 +5,14 @@ The format follows [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.1.0/
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-29
+
+### Security
+
+- Locked dependencies updated to fixed releases: `aiohttp` 3.14.5, `Pillow` 13.0.0 and `certifi` 2026.10.18, closing the open Dependabot alerts.
+  This affects installs from `uv.lock` (`make install`). The AUR package uses the distribution's libraries instead.
+- Development tools bumped: `ruff` 0.17.3, `ty` 0.0.94.
+
 ## [0.1.0] - 2026-10-04
 
 First public release.
@@ -34,5 +42,6 @@ First public release.
 - Tokens other than InnaIT are untested; Adobe Acrobat trust display is untested.
 - Revocation is never checked.
 
-[Unreleased]: https://github.com/TheDarkArtist/tda-dsc-signer/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/TheDarkArtist/tda-dsc-signer/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/TheDarkArtist/tda-dsc-signer/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/TheDarkArtist/tda-dsc-signer/releases/tag/v0.1.0
