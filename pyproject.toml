@@ -27,7 +27,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
-    "pyhanko[opentype,image-support]>=0.30,<0.38",  # 0.x: minors break; 0.37.0 verified. No [pkcs11] extra: it pins python-pkcs11~=0.9.3, we require it directly
+    "pyhanko[opentype,image-support]>=0.30,<0.39",  # 0.x: minors break; 0.37.0 verified. No [pkcs11] extra: it pins python-pkcs11~=0.9.3, we require it directly
     "python-pkcs11>=0.9,<0.11",  # 0.9.5 and 0.10.0 (Arch) verified
     "asn1crypto>=1.5,<2",  # 1.5.1 verified
 ]
